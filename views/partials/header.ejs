@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' | VoteSecure' : 'VoteSecure' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand">🗳️ VoteSecure</div>
+    <div class="nav-links">
+        <% if (user) { %>
+            <span class="nav-user">👤 <%= user.name %> (<%= user.role %>)</span>
+            <% if (user.role === 'admin') { %>
+                <a href="/admin/dashboard">📡 Dashboard</a>
+                <a href="/admin/elections">Elections</a>
+                <a href="/admin/voters">Voters</a>
+            <% } else { %>
+                <a href="/voter/elections">Elections</a>
+            <% } %>
+            <a href="/logout" class="btn-logout">Logout</a>
+        <% } %>
+    </div>
+</nav>
+
+<div class="container">
+
+<!-- Flash messages -->
+<% if (success && success.length > 0) { %>
+    <div class="alert alert-success"><%= success %></div>
+<% } %>
+<% if (error && error.length > 0) { %>
+    <div class="alert alert-error"><%= error %></div>
+<% } %>

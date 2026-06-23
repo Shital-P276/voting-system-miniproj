@@ -1,0 +1,72 @@
+<%- include('../partials/header', { title: candidate.name }) %>
+
+<div class="page-title">
+    <h1>👤 Candidate Profile</h1>
+    <a href="/voter/election/<%= candidate.election_id %>" class="btn btn-sm" style="background:#eee;color:#333;">← Back to Election</a>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 2fr; gap:20px; align-items:start;">
+
+    <!-- Profile card -->
+    <div class="card" style="text-align:center;">
+        <div style="width:90px; height:90px; border-radius:50%; background:#e8eaf6;
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:2.5rem; margin:0 auto 16px;">
+            👤
+        </div>
+        <h2 style="margin-bottom:6px;"><%= candidate.name %></h2>
+        <div style="color:#666; margin-bottom:12px;">🏛️ <%= candidate.party || 'Independent' %></div>
+        <span class="badge badge-<%= candidate.election_status %>">
+            Election: <%= candidate.election_status.toUpperCase() %>
+        </span>
+
+        <% if (voteCount !== null) { %>
+            <div style="margin-top:16px; padding:12px; background:#e8eaf6; border-radius:8px;">
+                <div style="font-size:1.8rem; font-weight:700; color:#1a237e;"><%= voteCount %></div>
+                <div style="font-size:0.85rem; color:#666;">Votes Received</div>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Details card -->
+    <div>
+        <div class="card">
+            <h2>About</h2>
+            <p style="color:#555; line-height:1.7; margin-top:8px;">
+                <%= candidate.bio || 'No biography provided for this candidate.' %>
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Election</h2>
+            <p><strong><%= candidate.election_title %></strong></p>
+            <div style="margin-top:12px;">
+                <span class="badge badge-<%= candidate.election_status %>">
+                    <%= candidate.election_status.toUpperCase() %>
+                </span>
+            </div>
+
+            <div class="btn-group" style="margin-top:16px;">
+                <% if (candidate.election_status === 'active' && !voted) { %>
+                    <a href="/voter/election/<%= candidate.election_id %>" class="btn btn-primary">
+                        🗳️ Vote in This Election
+                    </a>
+                <% } else if (voted && voted.candidate_id == candidate.id) { %>
+                    <span class="btn btn-sm" style="background:#e8f5e9;color:#2e7d32;cursor:default;">
+                        ✅ You voted for this candidate
+                    </span>
+                <% } else if (voted) { %>
+                    <span class="btn btn-sm" style="background:#fff3e0;color:#e65100;cursor:default;">
+                        You already voted in this election
+                    </span>
+                <% } %>
+                <a href="/voter/election/<%= candidate.election_id %>" class="btn btn-sm" style="background:#eee;color:#333;">
+                    View All Candidates
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: 'Elections' }) %>
+
+<div class="page-title">
+    <h1>🗳️ Elections</h1>
+</div>
+
+<% if (elections.length === 0) { %>
+    <div class="card">
+        <p>No elections available at the moment.</p>
+    </div>
+<% } else { %>
+    <% elections.forEach(e => { %>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <h2><%= e.title %></h2>
+                    <p style="color:#666; margin:6px 0 10px;"><%= e.description || 'No description.' %></p>
+                    <span class="badge badge-<%= e.status %>"><%= e.status.toUpperCase() %></span>
+                    <% if (e.has_voted > 0) { %>
+                        <span class="badge" style="background:#fff3e0;color:#e65100; margin-left:8px;">✅ Voted</span>
+                    <% } %>
+                </div>
+                <div style="text-align:right; font-size:0.85rem; color:#888;">
+                    <% if (e.start_time) { %><div>Started: <%= new Date(e.start_time).toLocaleString() %></div><% } %>
+                    <% if (e.end_time) { %><div>Ended: <%= new Date(e.end_time).toLocaleString() %></div><% } %>
+                    <div style="margin-top:6px;">Total votes: <strong><%= e.total_votes %></strong></div>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top:14px;">
+                <% if (e.status === 'active' && e.has_voted === 0) { %>
+                    <a href="/voter/election/<%= e.id %>" class="btn btn-primary btn-sm">Vote Now</a>
+                <% } else if (e.status === 'active' && e.has_voted > 0) { %>
+                    <a href="/voter/election/<%= e.id %>" class="btn btn-sm" style="background:#e8f5e9;color:#2e7d32;">View (Voted)</a>
+                <% } else if (e.status === 'ended') { %>
+                    <a href="/voter/election/<%= e.id %>" class="btn btn-sm" style="background:#f3e5f5;color:#6a1b9a;">View Results</a>
+                <% } else { %>
+                    <span class="btn btn-sm" style="background:#eee;color:#999;cursor:default;">Coming Soon</span>
+                <% } %>
+            </div>
+        </div>
+    <% }) %>
+<% } %>
+
+<%- include('../partials/footer') %>

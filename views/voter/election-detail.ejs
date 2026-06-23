@@ -1,0 +1,106 @@
+<%- include('../partials/header', { title: election.title }) %>
+
+<div class="page-title">
+    <h1><%= election.title %></h1>
+    <a href="/voter/elections" class="btn btn-sm" style="background:#eee;color:#333;">← Back</a>
+</div>
+
+<div class="card">
+    <p><%= election.description || 'No description.' %></p>
+    <div style="margin-top:10px;">
+        <span class="badge badge-<%= election.status %>"><%= election.status.toUpperCase() %></span>
+        <% if (election.start_time) { %>
+            <span style="font-size:0.85rem;color:#888;margin-left:12px;">
+                Started: <%= new Date(election.start_time).toLocaleString() %>
+            </span>
+        <% } %>
+    </div>
+</div>
+
+<!-- Already voted -->
+<% if (voted) { %>
+    <div class="card" style="border-left:4px solid #4caf50;">
+        <h2>✅ You have already voted</h2>
+        <p>Your vote has been recorded and cannot be changed.</p>
+    </div>
+
+    <% if (election.status === 'ended') { %>
+        <div class="card">
+            <h2>📊 Results</h2>
+            <!-- Show results inline for voter on ended election -->
+            <p><em>Results are available. Check back on the elections page.</em></p>
+        </div>
+    <% } %>
+
+<!-- Active election, not voted -->
+<% } else if (election.status === 'active') { %>
+    <div class="card">
+        <h2>🗳️ Cast Your Vote</h2>
+        <p style="color:#666; margin-bottom:16px;">Select a candidate and submit. <strong>Your vote cannot be changed.</strong></p>
+
+        <form action="/voter/vote" method="POST" id="voteForm">
+            <input type="hidden" name="election_id" value="<%= election.id %>">
+
+            <div class="candidate-grid" id="candidateGrid">
+                <% candidates.forEach(c => { %>
+                    <div class="candidate-card" onclick="selectCandidate('<%= c.id %>', this)">
+                        <h3>👤 <%= c.name %></h3>
+                        <div class="party">🏛️ <%= c.party || 'Independent' %></div>
+                        <div class="bio"><%= c.bio ? c.bio.substring(0, 80) + '...' : '' %></div>
+                        <a href="/voter/candidate/<%= c.id %>"
+                           onclick="event.stopPropagation()"
+                           style="font-size:0.82rem;color:#1a237e;margin-top:8px;display:inline-block;">
+                           View Profile →
+                        </a>
+                        <input type="radio" name="candidate_id" value="<%= c.id %>"
+                               style="display:none;" id="cand_<%= c.id %>">
+                    </div>
+                <% }) %>
+            </div>
+
+            <div style="margin-top:20px;">
+                <button type="submit" class="btn btn-success" id="submitBtn" disabled
+                        onclick="return confirm('Are you sure? Your vote cannot be changed.')">
+                    Submit Vote
+                </button>
+                <span id="selectHint" style="color:#888;font-size:0.9rem;margin-left:12px;">
+                    Select a candidate above
+                </span>
+            </div>
+        </form>
+    </div>
+
+<!-- Upcoming -->
+<% } else if (election.status === 'upcoming') { %>
+    <div class="card">
+        <h2>⏳ Election Not Started</h2>
+        <p>This election hasn't started yet. Check back later.</p>
+    </div>
+    <div class="card">
+        <h2>Candidates</h2>
+        <% candidates.forEach(c => { %>
+            <div style="padding:12px 0; border-bottom:1px solid #eee;">
+                <strong><%= c.name %></strong> — <%= c.party || 'Independent' %>
+            </div>
+        <% }) %>
+    </div>
+
+<!-- Ended -->
+<% } else { %>
+    <div class="card">
+        <h2>🔒 Election Ended</h2>
+        <p>You did not vote in this election.</p>
+    </div>
+<% } %>
+
+<script>
+function selectCandidate(id, el) {
+    document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('cand_' + id).checked = true;
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('selectHint').style.display = 'none';
+}
+</script>
+
+<%- include('../partials/footer') %>

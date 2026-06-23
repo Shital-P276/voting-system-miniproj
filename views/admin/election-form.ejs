@@ -1,0 +1,24 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="page-title">
+    <h1><%= election ? '✏️ Edit Election' : '➕ New Election' %></h1>
+    <a href="/admin/elections" class="btn btn-sm" style="background:#eee;color:#333;">← Back</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <form action="/admin/elections/<%= election ? election.id + '/edit' : 'new' %>" method="POST">
+        <div class="form-group">
+            <label>Election Title *</label>
+            <input type="text" name="title" required
+                   value="<%= election ? election.title : '' %>"
+                   placeholder="e.g. Student Council Election 2026">
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" placeholder="Brief description of the election..."><%= election ? election.description : '' %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary"><%= election ? 'Save Changes' : 'Create Election' %></button>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>

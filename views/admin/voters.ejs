@@ -1,0 +1,50 @@
+<%- include('../partials/header', { title: 'Manage Voters' }) %>
+
+<div class="page-title">
+    <h1>👥 Voter Accounts</h1>
+    <span style="color:#888;font-size:0.9rem;"><%= voters.length %> registered voters</span>
+</div>
+
+<div class="card">
+    <% if (voters.length === 0) { %>
+        <p style="color:#888;">No voters registered yet.</p>
+    <% } else { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Registered</th>
+                    <th>Votes Cast</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% voters.forEach(v => { %>
+                <tr>
+                    <td><strong><%= v.name %></strong></td>
+                    <td><%= v.email %></td>
+                    <td><%= new Date(v.created_at).toLocaleDateString() %></td>
+                    <td><%= v.votes_cast %></td>
+                    <td>
+                        <span class="badge" style="background:<%= v.is_active ? '#e8f5e9' : '#ffebee' %>; color:<%= v.is_active ? '#2e7d32' : '#c62828' %>">
+                            <%= v.is_active ? 'Active' : 'Disabled' %>
+                        </span>
+                    </td>
+                    <td>
+                        <form action="/admin/voters/<%= v.id %>/toggle" method="POST" style="display:inline;">
+                            <button class="btn btn-sm <%= v.is_active ? 'btn-danger' : 'btn-success' %>"
+                                    onclick="return confirm('<%= v.is_active ? 'Disable' : 'Enable' %> this voter?')">
+                                <%= v.is_active ? 'Disable' : 'Enable' %>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

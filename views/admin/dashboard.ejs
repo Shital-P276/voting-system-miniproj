@@ -1,0 +1,126 @@
+<%- include('../partials/header', { title: 'Live Dashboard' }) %>
+
+<div class="page-title">
+    <h1>📡 Live Turnout Dashboard</h1>
+    <span id="lastUpdated" style="color:#888; font-size:0.85rem;">Updating...</span>
+</div>
+
+<!-- Overall stats -->
+<div class="stats-row" id="overallStats">
+    <div class="stat-card">
+        <div class="stat-num" id="totalVoters"><%= total_users %></div>
+        <div class="stat-label">Registered Voters</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="activeCount"><%= elections.filter(e => e.status === 'active').length %></div>
+        <div class="stat-label">Active Elections</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="totalVotesCast"><%= elections.reduce((s, e) => s + Number(e.total_votes), 0) %></div>
+        <div class="stat-label">Total Votes Cast</div>
+    </div>
+</div>
+
+<!-- Active elections turnout -->
+<div id="activeElections">
+    <% const active = elections.filter(e => e.status === 'active'); %>
+    <% if (active.length === 0) { %>
+        <div class="card" id="noActiveMsg">
+            <p style="color:#888;">No active elections right now. Start one from <a href="/admin/elections">Elections</a>.</p>
+        </div>
+    <% } else { %>
+        <% active.forEach(e => { %>
+        <div class="card" id="election-card-<%= e.id %>">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2><%= e.title %></h2>
+                <span class="badge badge-active">LIVE 🔴</span>
+            </div>
+            <div style="margin: 16px 0;">
+                <div class="result-bar-label">
+                    <span>Voter Turnout</span>
+                    <span id="votes-<%= e.id %>"><%= e.total_votes %></span> / <%= total_users %> voters
+                </div>
+                <div class="result-bar-bg">
+                    <div class="result-bar-fill" id="bar-<%= e.id %>"
+                         style="width: <%= total_users > 0 ? Math.round((e.total_votes / total_users) * 100) : 0 %>%">
+                    </div>
+                </div>
+                <div style="text-align:right; font-size:0.85rem; color:#666; margin-top:4px;">
+                    <span id="pct-<%= e.id %>"><%= total_users > 0 ? Math.round((e.total_votes / total_users) * 100) : 0 %></span>% turnout
+                </div>
+            </div>
+            <div class="btn-group">
+                <a href="/admin/elections/<%= e.id %>/results" class="btn btn-sm btn-warning">Results</a>
+                <a href="/admin/elections/<%= e.id %>/stats" class="btn btn-sm btn-primary">Stats & Charts</a>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<!-- All elections summary table -->
+<div class="card">
+    <h2>All Elections Summary</h2>
+    <table>
+        <thead>
+            <tr><th>Election</th><th>Status</th><th>Votes</th><th>Candidates</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            <% elections.forEach(e => { %>
+            <tr>
+                <td><strong><%= e.title %></strong></td>
+                <td><span class="badge badge-<%= e.status %>"><%= e.status.toUpperCase() %></span></td>
+                <td><%= e.total_votes %></td>
+                <td><%= e.candidate_count %></td>
+                <td>
+                    <a href="/admin/elections/<%= e.id %>/stats" class="btn btn-sm btn-primary">Charts</a>
+                    <a href="/admin/elections/<%= e.id %>/results" class="btn btn-sm btn-warning">Results</a>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Poll /admin/api/turnout every 5 seconds
+const totalVoters = <%= total_users %>;
+
+async function refreshTurnout() {
+    try {
+        const res = await fetch('/admin/api/turnout');
+        const data = await res.json();
+
+        // Update timestamp
+        const t = new Date(data.timestamp);
+        document.getElementById('lastUpdated').textContent =
+            'Last updated: ' + t.toLocaleTimeString();
+
+        // Update total votes cast
+        const totalVotes = data.elections.reduce((s, e) => s + Number(e.total_votes), 0);
+        document.getElementById('totalVotesCast').textContent = totalVotes;
+        document.getElementById('activeCount').textContent = data.elections.length;
+
+        // Update each active election bar
+        data.elections.forEach(e => {
+            const votesEl = document.getElementById('votes-' + e.id);
+            const barEl   = document.getElementById('bar-' + e.id);
+            const pctEl   = document.getElementById('pct-' + e.id);
+            if (votesEl) votesEl.textContent = e.total_votes;
+            const pct = data.total_voters > 0
+                ? Math.round((e.total_votes / data.total_voters) * 100) : 0;
+            if (barEl) barEl.style.width = pct + '%';
+            if (pctEl) pctEl.textContent = pct;
+        });
+
+    } catch (err) {
+        console.error('Turnout refresh failed:', err);
+    }
+}
+
+// Refresh every 5 seconds
+setInterval(refreshTurnout, 5000);
+refreshTurnout(); // immediate first call
+</script>
+
+<%- include('../partials/footer') %>

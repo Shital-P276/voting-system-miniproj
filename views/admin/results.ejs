@@ -1,0 +1,69 @@
+<%- include('../partials/header', { title: 'Results' }) %>
+
+<div class="page-title">
+    <h1>📊 Results — <%= election.title %></h1>
+    <a href="/admin/elections" class="btn btn-sm" style="background:#eee;color:#333;">← Back</a>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-num"><%= total_votes %></div>
+        <div class="stat-label">Total Votes Cast</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num"><%= results.length %></div>
+        <div class="stat-label">Candidates</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num"><span class="badge badge-<%= election.status %>"><%= election.status.toUpperCase() %></span></div>
+        <div class="stat-label">Election Status</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Vote Breakdown</h2>
+    <% if (results.length === 0) { %>
+        <p style="color:#888;">No candidates registered.</p>
+    <% } else { %>
+        <% results.forEach((r, i) => { %>
+            <% const pct = total_votes > 0 ? Math.round((r.vote_count / total_votes) * 100) : 0; %>
+            <div style="margin-bottom:20px;">
+                <div class="result-bar-label">
+                    <span>
+                        <% if (i === 0 && total_votes > 0) { %><strong>🏆 </strong><% } %>
+                        <strong><%= r.name %></strong>
+                        <span style="color:#888;margin-left:8px;font-size:0.85rem;"><%= r.party || 'Independent' %></span>
+                    </span>
+                    <span><strong><%= r.vote_count %></strong> votes (<%= pct %>%)</span>
+                </div>
+                <div class="result-bar-bg">
+                    <div class="result-bar-fill" style="width:<%= pct %>%;"></div>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<!-- Raw table -->
+<div class="card">
+    <h2>Detailed Table</h2>
+    <table>
+        <thead>
+            <tr><th>Rank</th><th>Candidate</th><th>Party</th><th>Votes</th><th>Percentage</th></tr>
+        </thead>
+        <tbody>
+            <% results.forEach((r, i) => { %>
+            <% const pct = total_votes > 0 ? ((r.vote_count / total_votes) * 100).toFixed(1) : '0.0'; %>
+            <tr>
+                <td><%= i === 0 && total_votes > 0 ? '🏆 1' : i + 1 %></td>
+                <td><strong><%= r.name %></strong></td>
+                <td><%= r.party || '—' %></td>
+                <td><%= r.vote_count %></td>
+                <td><%= pct %>%</td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('../partials/footer') %>

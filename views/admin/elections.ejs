@@ -1,0 +1,65 @@
+<%- include('../partials/header', { title: 'Manage Elections' }) %>
+
+<div class="page-title">
+    <h1>⚙️ Manage Elections</h1>
+    <a href="/admin/elections/new" class="btn btn-primary">+ New Election</a>
+</div>
+
+<% if (elections.length === 0) { %>
+    <div class="card"><p>No elections yet. Create one!</p></div>
+<% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Candidates</th>
+                <th>Votes Cast</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% elections.forEach(e => { %>
+            <tr>
+                <td><strong><%= e.title %></strong><br><small style="color:#888;"><%= e.description ? e.description.substring(0,60) + '...' : '' %></small></td>
+                <td><span class="badge badge-<%= e.status %>"><%= e.status.toUpperCase() %></span></td>
+                <td><%= e.candidate_count %></td>
+                <td><%= e.total_votes %></td>
+                <td>
+                    <div class="btn-group">
+                        <!-- Candidates -->
+                        <a href="/admin/elections/<%= e.id %>/candidates" class="btn btn-sm btn-primary">Candidates</a>
+
+                        <!-- Results + Stats -->
+                        <a href="/admin/elections/<%= e.id %>/results" class="btn btn-sm btn-warning">Results</a>
+                        <a href="/admin/elections/<%= e.id %>/stats" class="btn btn-sm btn-primary">Charts</a>
+
+                        <!-- Start/End -->
+                        <% if (e.status === 'upcoming') { %>
+                            <form action="/admin/elections/<%= e.id %>/toggle" method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="start">
+                                <button class="btn btn-sm btn-success" onclick="return confirm('Start this election?')">Start</button>
+                            </form>
+                        <% } else if (e.status === 'active') { %>
+                            <form action="/admin/elections/<%= e.id %>/toggle" method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="end">
+                                <button class="btn btn-sm btn-danger" onclick="return confirm('End this election?')">End</button>
+                            </form>
+                        <% } %>
+
+                        <!-- Edit (only if upcoming) -->
+                        <% if (e.status === 'upcoming') { %>
+                            <a href="/admin/elections/<%= e.id %>/edit" class="btn btn-sm" style="background:#eee;color:#333;">Edit</a>
+                            <form action="/admin/elections/<%= e.id %>/delete" method="POST" style="display:inline;">
+                                <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this election and all its data?')">Delete</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+<% } %>
+
+<%- include('../partials/footer') %>
